@@ -1,3 +1,4 @@
+
 name: Build HavaPeyma APK
 
 on:
@@ -8,29 +9,53 @@ on:
 permissions:
   contents: read
 
-env:
-  JAVA_VERSION: '17'
-
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout source
+      - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Extract Android source ZIP
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          ZIP_PATH=$(find . -maxdepth 1 -name 'HavaPeyma_GitHub_Source_*.zip' -print -quit)
+
+          if [ -z "$ZIP_PATH" ]; then
+            echo "::error::Android source ZIP not found"
+            ls -la
+            exit 1
+          fi
+
+          mkdir -p extracted
+          unzip -q "$ZIP_PATH" -d extracted
+
+          SETTINGS=$(find extracted -type f \( -name settings.gradle.kts -o -name settings.gradle \) -print -quit)
+
+          if [ -z "$SETTINGS" ]; then
+            echo "::error::Gradle settings file not found in ZIP"
+            find extracted -maxdepth 5 -type f
+            exit 1
+          fi
+
+          PROJECT_DIR=$(dirname "$SETTINGS")
+          cp -a "$PROJECT_DIR/." .
 
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: ${{ env.JAVA_VERSION }}
+          java-version: '17'
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: 8.9
+          gradle-version: '8.9'
 
-      - name: Build debug APK
+      - name: Build APK
         run: gradle --no-daemon assembleDebug
 
       - name: Upload APK
