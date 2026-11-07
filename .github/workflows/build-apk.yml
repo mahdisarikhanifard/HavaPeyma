@@ -1,9 +1,12 @@
-name: Build HavaPeyma APK
+name: Build HavaPeyma APK 1.3.0
 
 on:
   workflow_dispatch:
   push:
     branches: [ main, master ]
+    paths:
+      - 'HavaPeyma_GitHub_Source_v1.3.0.zip'
+      - '.github/workflows/build-apk.yml'
 
 permissions:
   contents: read
@@ -16,38 +19,44 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Verify and extract HavaPeyma 1.2.2 source
+      - name: Extract and validate HavaPeyma 1.3.0 source
         shell: bash
         run: |
           set -euo pipefail
-          ZIP_PATH="HavaPeyma_GitHub_Source_v1.2.2.zip"
+          ZIP_PATH="$GITHUB_WORKSPACE/HavaPeyma_GitHub_Source_v1.3.0.zip"
           if [[ ! -s "$ZIP_PATH" ]]; then
             echo "::error::Required source ZIP is missing: $ZIP_PATH"
-            ls -la
+            ls -la "$GITHUB_WORKSPACE"
             exit 1
           fi
           mkdir -p "$RUNNER_TEMP/havapeyma-source"
           unzip -q "$ZIP_PATH" -d "$RUNNER_TEMP/havapeyma-source"
           mapfile -t SETTINGS_FILES < <(find "$RUNNER_TEMP/havapeyma-source" -type f -name settings.gradle.kts -print)
           if [[ "${#SETTINGS_FILES[@]}" -ne 1 ]]; then
-            echo "::error::Expected exactly one settings.gradle.kts in source ZIP. Found ${#SETTINGS_FILES[@]}"
-            find "$RUNNER_TEMP/havapeyma-source" -maxdepth 5 -type f -print
+            echo "::error::Expected exactly one settings.gradle.kts. Found ${#SETTINGS_FILES[@]}"
+            find "$RUNNER_TEMP/havapeyma-source" -maxdepth 6 -type f -print
             exit 1
           fi
           PROJECT_DIR="$(dirname "${SETTINGS_FILES[0]}")"
           test -s "$PROJECT_DIR/build.gradle.kts"
           test -s "$PROJECT_DIR/app/build.gradle.kts"
           test -s "$PROJECT_DIR/app/src/main/AndroidManifest.xml"
-          grep -q 'applicationId = "com.example.havapeyma"' "$PROJECT_DIR/app/build.gradle.kts"
-          grep -q 'versionName = "1.2.2"' "$PROJECT_DIR/app/build.gradle.kts"
           test -s "$PROJECT_DIR/app/src/main/java/com/example/havapeyma/MainActivity.kt"
           test -s "$PROJECT_DIR/app/src/main/java/com/example/havapeyma/WeatherWidgetProvider.kt"
-          if grep -nE '<View([[:space:]>])' "$PROJECT_DIR"/app/src/main/res/layout/widget_{small,medium,large}.xml; then
-            echo "::error::Unsupported generic View found in a RemoteViews widget layout"
-            exit 1
-          fi
+          grep -q 'applicationId = "com.example.havapeyma"' "$PROJECT_DIR/app/build.gradle.kts"
+          grep -q 'versionName = "1.3.0"' "$PROJECT_DIR/app/build.gradle.kts"
+          for layout in small medium large; do
+            test -s "$PROJECT_DIR/app/src/main/res/layout/widget_${layout}.xml"
+            grep -q 'widget_city_prev' "$PROJECT_DIR/app/src/main/res/layout/widget_${layout}.xml"
+            grep -q 'widget_city_next' "$PROJECT_DIR/app/src/main/res/layout/widget_${layout}.xml"
+            if grep -nE '<View([[:space:]>])' "$PROJECT_DIR/app/src/main/res/layout/widget_${layout}.xml"; then
+              echo "::error::Unsupported generic View found in RemoteViews layout: $layout"
+              exit 1
+            fi
+            grep -q 'android:resizeMode="horizontal|vertical"' "$PROJECT_DIR/app/src/main/res/xml/widget_${layout}_info.xml"
+          done
           rsync -a --exclude='/.github/' "$PROJECT_DIR/" "$GITHUB_WORKSPACE/"
-          echo "Validated and extracted HavaPeyma 1.2.2 source."
+          echo "Validated HavaPeyma 1.3.0 source."
 
       - name: Set up Java 17
         uses: actions/setup-java@v4
@@ -71,9 +80,18 @@ jobs:
       - name: Build debug APK
         run: gradle --no-daemon assembleDebug
 
-      - name: Upload APK
+      - name: Verify APK and upload artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          APK="app/build/outputs/apk/debug/app-debug.apk"
+          test -s "$APK"
+          mkdir -p dist
+          cp "$APK" dist/HavaPeyma-1.3.0-debug.apk
+
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: HavaPeyma-1.2.2-debug-apk
-          path: app/build/outputs/apk/debug/app-debug.apk
+          name: HavaPeyma-1.3.0-debug-apk
+          path: dist/HavaPeyma-1.3.0-debug.apk
           if-no-files-found: error
