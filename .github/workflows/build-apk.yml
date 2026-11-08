@@ -49,7 +49,7 @@ jobs:
           grep -q 'dailyAnalyses' "$PROJECT_DIR/app/src/main/java/com/example/havapeyma/MainActivity.kt"
           grep -q 'renderForecastDayButtons' "$PROJECT_DIR/app/src/main/java/com/example/havapeyma/MainActivity.kt"
           grep -q 'fetchAgriculturalYearRainfall' "$PROJECT_DIR/app/src/main/java/com/example/havapeyma/MainActivity.kt"
-          grep -q 'PersianCalendar.MONTH, 6' "$PROJECT_DIR/app/src/main/java/com/example/havapeyma/MainActivity.kt"
+          grep -q 'Calendar.MONTH, 6' "$PROJECT_DIR/app/src/main/java/com/example/havapeyma/MainActivity.kt"
           grep -q 'app_refresh_minutes' "$PROJECT_DIR/app/src/main/java/com/example/havapeyma/MainActivity.kt"
           grep -q 'widget_refresh_minutes' "$PROJECT_DIR/app/src/main/java/com/example/havapeyma/MainActivity.kt"
           grep -q 'WidgetRefreshScheduler' "$PROJECT_DIR/app/src/main/java/com/example/havapeyma/MainActivity.kt"
@@ -60,6 +60,7 @@ jobs:
           grep -q 'ncep_gfs_seamless' "$PROJECT_DIR/app/src/main/java/com/example/havapeyma/MainActivity.kt"
           grep -q 'icon_seamless' "$PROJECT_DIR/app/src/main/java/com/example/havapeyma/MainActivity.kt"
           ! grep -q 'hourly=time,' "$PROJECT_DIR/app/src/main/java/com/example/havapeyma/MainActivity.kt"
+          grep -q 'filter { it.length == 10 }' "$PROJECT_DIR/app/src/main/java/com/example/havapeyma/MainActivity.kt"
           for layout in small medium large; do
             test -s "$PROJECT_DIR/app/src/main/res/layout/widget_${layout}.xml"
             grep -q 'widget_city_prev' "$PROJECT_DIR/app/src/main/res/layout/widget_${layout}.xml"
