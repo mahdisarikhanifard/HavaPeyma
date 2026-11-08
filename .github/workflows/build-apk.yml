@@ -5,7 +5,7 @@ on:
   push:
     branches: [ main, master ]
     paths:
-      - 'HavaPeyma_GitHub_Source_v1.3.6.zip'
+      - 'HavaPeyma_GitHub_Source_v1.3.6_OpenMeteoFix.zip'
       - '.github/workflows/build-apk.yml'
 
 permissions:
@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   build:
-    name: Build and verify HavaPeyma 1.3.6
+    name: Build and verify HavaPeyma 1.3.6 Open-Meteo fix
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
@@ -24,7 +24,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          ZIP_PATH="$GITHUB_WORKSPACE/HavaPeyma_GitHub_Source_v1.3.6.zip"
+          ZIP_PATH="$GITHUB_WORKSPACE/HavaPeyma_GitHub_Source_v1.3.6_OpenMeteoFix.zip"
           if [[ ! -s "$ZIP_PATH" ]]; then
             echo "::error::Required source ZIP is missing: $ZIP_PATH"
             ls -la "$GITHUB_WORKSPACE"
@@ -53,6 +53,8 @@ jobs:
           grep -q 'ncep_gfs_seamless' "$PROJECT_DIR/app/src/main/java/com/example/havapeyma/MainActivity.kt"
           grep -q 'icon_seamless' "$PROJECT_DIR/app/src/main/java/com/example/havapeyma/MainActivity.kt"
           grep -q 'HTTP $code' "$PROJECT_DIR/app/src/main/java/com/example/havapeyma/MainActivity.kt"
+          ! grep -q 'hourly=time,' "$PROJECT_DIR/app/src/main/java/com/example/havapeyma/MainActivity.kt"
+          grep -q 'hourly.optJSONArray("time")' "$PROJECT_DIR/app/src/main/java/com/example/havapeyma/MainActivity.kt"
           grep -q 'android:layout_width="50dp" android:layout_height="50dp"' "$PROJECT_DIR/app/src/main/res/layout/widget_small.xml"
           for layout in small medium large; do
             test -s "$PROJECT_DIR/app/src/main/res/layout/widget_${layout}.xml"
@@ -105,6 +107,6 @@ jobs:
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: HavaPeyma-1.3.6-debug-apk
+          name: HavaPeyma-1.3.6-OpenMeteoFix-debug-apk
           path: dist/HavaPeyma-1.3.6-debug.apk
           if-no-files-found: error
