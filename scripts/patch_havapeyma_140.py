@@ -129,6 +129,7 @@ new = '''        val refreshIntent = Intent(context, WidgetRefreshReceiver::clas
 if ws.count(old) != 1:
     raise SystemExit(f"widget refresh PendingIntent anchor count: {ws.count(old)}")
 ws = ws.replace(old, new, 1)
+receiver_src = main.read_text(encoding="utf-8")
 old = '''        val update = Intent(WeatherWidgetProvider.ACTION_UPDATE_WIDGET).setPackage(context.packageName)
         context.sendBroadcast(update)
     }
@@ -148,7 +149,8 @@ new = '''        val providers = listOf(
         const val ACTION_TICK = "com.example.havapeyma.WIDGET_REFRESH_TICK"
         const val ACTION_MANUAL_REFRESH = "com.example.havapeyma.WIDGET_MANUAL_REFRESH"
     }'''
-if ws.count(old) != 1:
-    raise SystemExit(f"widget receiver anchor count: {ws.count(old)}")
-ws = ws.replace(old, new, 1)
-widget.write_text(ws, encoding="utf-8")
+if receiver_src.count(old) != 1:
+    raise SystemExit(f"widget receiver anchor count: {receiver_src.count(old)}")
+receiver_src = receiver_src.replace(old, new, 1)
+main.write_text(receiver_src, encoding="utf-8")
+
