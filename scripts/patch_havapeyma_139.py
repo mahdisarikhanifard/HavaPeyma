@@ -51,7 +51,7 @@ rep('                val hWindGust = hourlyData.optJSONArray("wind_gusts_10m")\n
     '                        if (date.length != 10) continue\n'
     '                        hourlyByDate.getOrPut(date) { mutableListOf() }.add(\n'
     '                            HourlyForecast(\n'
-    '                                time = timestamp.substringAfter(\\'T\\', "--:--").take(5),\n'
+    '                                time = timestamp.substringAfter("T", "--:--").take(5),\n'
     '                                temperature = hTemps.optDouble(i, Double.NaN),\n'
     '                                precipitation = hPrecip?.optDouble(i, Double.NaN) ?: Double.NaN,\n'
     '                                precipitationProbability = hRain?.optDouble(i, Double.NaN) ?: Double.NaN,\n'
