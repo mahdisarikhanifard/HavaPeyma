@@ -92,8 +92,8 @@ rep('            if (actual == null) append("\\nمبنای سال کشاورزی
     "        } else buildString {\n"
     '            append("ساعت  |  دما  |  بارش  |  احتمال بارش  |  باد  |  تندباد\\n")\n'
     "            hours.forEach { hour ->\n"
-    '                append("\${hour.time}  |  \${format(hour.temperature)}°C  |  \${formatMm(hour.precipitation)} mm  |  ")\n'
-    '                append("\${format(hour.precipitationProbability)}٪  |  \${format(hour.windSpeed)} km/h \${windDirectionText(hour.windDirection)}  |  \${format(hour.windGust)} km/h\\n")\n'
+    '                append("${hour.time}  |  ${format(hour.temperature)}°C  |  ${formatMm(hour.precipitation)} mm  |  ")\n'
+    '                append("${format(hour.precipitationProbability)}٪  |  ${format(hour.windSpeed)} km/h ${windDirectionText(hour.windDirection)}  |  ${format(hour.windGust)} km/h\\n")\n'
     "            }\n"
     "        }\n",
     "hourly report renderer")
