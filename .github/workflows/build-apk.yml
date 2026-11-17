@@ -31,11 +31,11 @@ jobs:
           mkdir -p "$RUNNER_TEMP/havapeyma-source" "$GITHUB_WORKSPACE/dist"
           unzip -q "$ZIP_PATH" -d "$RUNNER_TEMP/havapeyma-source"
           mapfile -t SETTINGS_FILES < <(find "$RUNNER_TEMP/havapeyma-source" -type f -name settings.gradle.kts -print)
-          if [[ "\${#SETTINGS_FILES[@]}" -ne 1 ]]; then
-            echo "::error::Expected exactly one settings.gradle.kts; found \${#SETTINGS_FILES[@]}"
+          if [[ "${#SETTINGS_FILES[@]}" -ne 1 ]]; then
+            echo "::error::Expected exactly one settings.gradle.kts; found ${#SETTINGS_FILES[@]}"
             exit 1
           fi
-          PROJECT_DIR="$(dirname "\${SETTINGS_FILES[0]}")"
+          PROJECT_DIR="$(dirname "${SETTINGS_FILES[0]}")"
           export PROJECT_DIR
           python3 scripts/patch_havapeyma_139.py
           test -s "$PROJECT_DIR/build.gradle.kts"
