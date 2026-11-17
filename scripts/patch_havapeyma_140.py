@@ -115,3 +115,40 @@ g = g.replace('versionName = "1.3.7"', 'versionName = "1.4.0"', 1)
 g = g.replace("versionCode = 13", "versionCode = 16", 1)
 gradle.write_text(g, encoding="utf-8")
 print("Patched HavaPeyma 1.4.0: selected-day hourly rendering fixed; widget refresh routed through a dedicated receiver.")
+
+
+# Route manual widget refreshes through one explicit, manifest-registered receiver.
+widget = root / "app/src/main/java/com/example/havapeyma/WeatherWidgetProvider.kt"
+ws = widget.read_text(encoding="utf-8")
+old = '''        val refreshIntent = Intent(context, javaClass).setAction(ACTION_UPDATE_WIDGET)
+            .putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, id)
+        views.setOnClickPendingIntent(R.id.widget_refresh, PendingIntent.getBroadcast(context, id * 10 + 3, refreshIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE))'''
+new = '''        val refreshIntent = Intent(context, WidgetRefreshReceiver::class.java)
+            .setAction(WidgetRefreshReceiver.ACTION_MANUAL_REFRESH)
+        views.setOnClickPendingIntent(R.id.widget_refresh, PendingIntent.getBroadcast(context, id * 10 + 3, refreshIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE))'''
+if ws.count(old) != 1:
+    raise SystemExit(f"widget refresh PendingIntent anchor count: {ws.count(old)}")
+ws = ws.replace(old, new, 1)
+old = '''        val update = Intent(WeatherWidgetProvider.ACTION_UPDATE_WIDGET).setPackage(context.packageName)
+        context.sendBroadcast(update)
+    }
+    companion object { const val ACTION_TICK = "com.example.havapeyma.WIDGET_REFRESH_TICK" }'''
+new = '''        val providers = listOf(
+            SmallWeatherWidgetProvider::class.java,
+            MediumWeatherWidgetProvider::class.java,
+            LargeWeatherWidgetProvider::class.java
+        )
+        providers.forEach { provider ->
+            context.sendBroadcast(
+                Intent(WeatherWidgetProvider.ACTION_UPDATE_WIDGET).setClass(context, provider)
+            )
+        }
+    }
+    companion object {
+        const val ACTION_TICK = "com.example.havapeyma.WIDGET_REFRESH_TICK"
+        const val ACTION_MANUAL_REFRESH = "com.example.havapeyma.WIDGET_MANUAL_REFRESH"
+    }'''
+if ws.count(old) != 1:
+    raise SystemExit(f"widget receiver anchor count: {ws.count(old)}")
+ws = ws.replace(old, new, 1)
+widget.write_text(ws, encoding="utf-8")
