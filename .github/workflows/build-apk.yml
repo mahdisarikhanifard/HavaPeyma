@@ -1,4 +1,4 @@
-name: Build HavaPeyma APK 1.4.0 Hourly Forecast and Google Weather Search
+name: Build HavaPeyma APK 1.4.0 Selected Day Hourly and Widget Refresh
 
 on:
   workflow_dispatch:
