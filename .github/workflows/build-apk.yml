@@ -1,4 +1,4 @@
-name: Build HavaPeyma APK 1.3.9 Hourly Forecast and Google Weather Search
+name: Build HavaPeyma APK 1.4.0 Hourly Forecast and Google Weather Search
 
 on:
   workflow_dispatch:
@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   build:
-    name: Build and verify HavaPeyma 1.3.9
+    name: Build and verify HavaPeyma 1.4.0
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
@@ -37,20 +37,20 @@ jobs:
           fi
           PROJECT_DIR="$(dirname "${SETTINGS_FILES[0]}")"
           export PROJECT_DIR
-          python3 scripts/patch_havapeyma_139.py
+          python3 scripts/patch_havapeyma_140.py
           test -s "$PROJECT_DIR/build.gradle.kts"
           test -s "$PROJECT_DIR/app/src/main/AndroidManifest.xml"
           grep -q 'applicationId = "com.example.havapeyma"' "$PROJECT_DIR/app/build.gradle.kts"
-          grep -q 'versionName = "1.3.9"' "$PROJECT_DIR/app/build.gradle.kts"
-          grep -q 'versionCode = 15' "$PROJECT_DIR/app/build.gradle.kts"
+          grep -q 'versionName = "1.4.0"' "$PROJECT_DIR/app/build.gradle.kts"
+          grep -q 'versionCode = 16' "$PROJECT_DIR/app/build.gradle.kts"
           grep -q 'hourlyReports = hourlyByDate' "$PROJECT_DIR/app/src/main/java/com/example/havapeyma/MainActivity.kt"
           grep -q 'مشاهده هواشناسی گوگل' "$PROJECT_DIR/app/src/main/java/com/example/havapeyma/MainActivity.kt"
           grep -q 'openGoogleWeather' "$PROJECT_DIR/app/src/main/java/com/example/havapeyma/MainActivity.kt"
           mkdir -p "$PROJECT_DIR/.github/workflows"
           cp "$GITHUB_WORKSPACE/.github/workflows/build-apk.yml" "$PROJECT_DIR/.github/workflows/build-apk.yml"
-          (cd "$PROJECT_DIR" && zip -qr "$GITHUB_WORKSPACE/dist/HavaPeyma_GitHub_Source_v1.3.9_HourlyForecast_GoogleWeather.zip" . -x '.gradle/*' 'app/build/*')
+          (cd "$PROJECT_DIR" && zip -qr "$GITHUB_WORKSPACE/dist/HavaPeyma_GitHub_Source_v1.4.0_HourlyForecast_GoogleWeather.zip" . -x '.gradle/*' 'app/build/*')
           rsync -a --exclude='/.github/' "$PROJECT_DIR/" "$GITHUB_WORKSPACE/"
-          echo "Source validation passed for HavaPeyma 1.3.9."
+          echo "Source validation passed for HavaPeyma 1.4.0."
 
       - name: Set up Java 17
         uses: actions/setup-java@v4
@@ -83,13 +83,13 @@ jobs:
             echo "::error::Debug APK was not generated."
             exit 1
           fi
-          cp "$APK" dist/HavaPeyma-1.3.9-debug.apk
+          cp "$APK" dist/HavaPeyma-1.4.0-debug.apk
 
       - name: Upload APK and complete source ZIP
         uses: actions/upload-artifact@v4
         with:
-          name: HavaPeyma-1.3.9-HourlyForecast-GoogleWeather-APK-and-Source
+          name: HavaPeyma-1.4.0-SelectedDayHourly-WidgetRefresh-APK-and-Source
           path: |
-            dist/HavaPeyma-1.3.9-debug.apk
-            dist/HavaPeyma_GitHub_Source_v1.3.9_HourlyForecast_GoogleWeather.zip
+            dist/HavaPeyma-1.4.0-debug.apk
+            dist/HavaPeyma_GitHub_Source_v1.4.0_HourlyForecast_GoogleWeather.zip
           if-no-files-found: error
